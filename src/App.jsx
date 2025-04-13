@@ -35,6 +35,7 @@ const App = () => {
     };
 
     React.useEffect(() => {
+        console.log(apiUrl);
         fetchStandings();
         fetchRecentFixtures();
     }, []);
