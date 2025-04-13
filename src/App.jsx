@@ -2,6 +2,26 @@ import React from "react";
 import "./index.css";
 
 const App = () => {
+    //do a test fetch from https://adleague-web-api-dev.azurewebsites.net/api/webtest
+    const [standings, setStandings] = React.useState(null);
+    const [selectedDivision, setSelectedDivision] = React.useState(null);
+    const fetchStandings = async () => {
+        try {
+            const response = await fetch(
+                "https://adleague-web-api-dev.azurewebsites.net/api/tournament-standings/15864815"
+            );
+            const data = await response.json();
+            setStandings(data);
+            setSelectedDivision(data.divisions?.[0]?.name || null);
+            console.log("Standings data:", data);
+        } catch (error) {
+            console.error("Error fetching standings:", error);
+        }
+    };
+
+    React.useEffect(() => {
+        fetchStandings();
+    }, []);
     return (
         <div className="min-h-screen bg-gray-900 text-white p-6">
             <header className="text-center py-10">
@@ -47,46 +67,75 @@ const App = () => {
 
             <main className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
                 <section id="standings">
-                    <h2 className="text-2xl font-bold mb-4">Live Standings</h2>
+                    <div className="flex justify-between items-center mb-4">
+                        <h2 className="text-2xl font-bold">Live Standings</h2>
+                        {standings && (
+                            <select
+                                value={selectedDivision}
+                                onChange={(e) =>
+                                    setSelectedDivision(e.target.value)
+                                }
+                                className="bg-gray-800 text-white border border-gray-600 px-4 py-2 rounded-md shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+                            >
+                                {standings.divisions.map((d) => (
+                                    <option key={d.name} value={d.name}>
+                                        {d.name}
+                                    </option>
+                                ))}
+                            </select>
+                        )}
+                    </div>
                     <table className="w-full text-sm text-left border border-gray-600">
                         <thead className="bg-gray-700">
                             <tr>
-                                <th className="p-2">Player</th>
-                                <th className="p-2">W</th>
-                                <th className="p-2">L</th>
-                                <th className="p-2">Legs Won</th>
-                                <th className="p-2">Legs Lost</th>
+                                <th className="p-2">Name</th>
+                                <th className="p-2">Played</th>
+                                <th className="p-2">Wins</th>
+                                <th className="p-2">Losses</th>
+                                <th className="p-2">Points</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr className="hover:bg-gray-800">
-                                <td className="p-2">Johnson</td>
-                                <td className="p-2">8</td>
-                                <td className="p-2">4</td>
-                                <td className="p-2">31</td>
-                                <td className="p-2">20</td>
-                            </tr>
-                            <tr className="hover:bg-gray-800">
-                                <td className="p-2">Smith</td>
-                                <td className="p-2">8</td>
-                                <td className="p-2">4</td>
-                                <td className="p-2">31</td>
-                                <td className="p-2">20</td>
-                            </tr>
-                            <tr className="hover:bg-gray-800">
-                                <td className="p-2">Taylor</td>
-                                <td className="p-2">7</td>
-                                <td className="p-2">5</td>
-                                <td className="p-2">28</td>
-                                <td className="p-2">24</td>
-                            </tr>
-                            <tr className="hover:bg-gray-800">
-                                <td className="p-2">Williams</td>
-                                <td className="p-2">6</td>
-                                <td className="p-2">6</td>
-                                <td className="p-2">26</td>
-                                <td className="p-2">26</td>
-                            </tr>
+                            {standings &&
+                                standings.divisions
+                                    .filter(
+                                        (division) =>
+                                            division.name === selectedDivision
+                                    )
+                                    .map((division) => (
+                                        <React.Fragment key={division.name}>
+                                            <tr className="bg-gray-700">
+                                                <td
+                                                    colSpan="5"
+                                                    className="p-2 font-bold"
+                                                >
+                                                    {division.name}
+                                                </td>
+                                            </tr>
+                                            {division.players.map((player) => (
+                                                <tr
+                                                    key={player.id}
+                                                    className="hover:bg-gray-800"
+                                                >
+                                                    <td className="p-2">
+                                                        {player.name.trim()}
+                                                    </td>
+                                                    <td className="p-2">
+                                                        {player.played}
+                                                    </td>
+                                                    <td className="p-2">
+                                                        {player.wins}
+                                                    </td>
+                                                    <td className="p-2">
+                                                        {player.losses}
+                                                    </td>
+                                                    <td className="p-2">
+                                                        {player.points}
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </React.Fragment>
+                                    ))}
                         </tbody>
                     </table>
                 </section>
