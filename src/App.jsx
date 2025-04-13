@@ -6,10 +6,12 @@ const App = () => {
     const [standings, setStandings] = React.useState(null);
     const [selectedDivision, setSelectedDivision] = React.useState(null);
     const [recentFixtures, setRecentFixtures] = React.useState([]);
+    const apiUrl = import.meta.env.VITE_API_URL;
     const fetchStandings = async () => {
         try {
             const response = await fetch(
-                "https://adleague-web-api-dev.azurewebsites.net/api/tournament-standings/15864815"
+                //"https://adleague-web-api-dev.azurewebsites.net/api/tournament-standings/15864815"
+                `${apiUrl}/tournament-standings/15864815`
             );
             const data = await response.json();
             setStandings(data);
@@ -22,7 +24,8 @@ const App = () => {
     const fetchRecentFixtures = async () => {
         try {
             const response = await fetch(
-                "https://adleague-web-api-dev.azurewebsites.net/api/recent-fixtures"
+                //"https://adleague-web-api-dev.azurewebsites.net/api/recent-fixtures"
+                `${apiUrl}/recent-fixtures`
             );
             const data = await response.json();
             setRecentFixtures(data.fixtures);
@@ -43,7 +46,7 @@ const App = () => {
                 </h1>
                 <a
                     href="https://discord.gg/YOUR_LINK"
-                    className="mt-4 inline-block bg-blue-600 text-white px-6 py-2 rounded-full hover:bg-blue-700 transition"
+                    className="mt-6 inline-block bg-blue-600 text-white px-6 py-2 rounded-full hover:bg-blue-700 transition"
                 >
                     Join via Discord
                 </a>
@@ -56,7 +59,9 @@ const App = () => {
                 >
                     <div className="text-blue-400 text-4xl mb-2">📅</div>
                     <h2 className="text-xl font-semibold">Weekly Fixtures</h2>
-                    <p className="text-sm text-gray-300">Current league week</p>
+                    <p className="text-sm text-gray-300">
+                        See the current weeks fixtures
+                    </p>
                 </a>
                 <a
                     href="#standings"
@@ -64,9 +69,7 @@ const App = () => {
                 >
                     <div className="text-blue-400 text-4xl mb-2">📈</div>
                     <h2 className="text-xl font-semibold">Standings</h2>
-                    <p className="text-sm text-gray-300">
-                        Current league tables
-                    </p>
+                    <p className="text-sm text-gray-300">League tables</p>
                 </a>
                 <a
                     href="#stats"
