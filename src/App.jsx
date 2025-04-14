@@ -35,7 +35,6 @@ const App = () => {
     };
 
     React.useEffect(() => {
-        console.log("URL: " + apiUrl);
         fetchStandings();
         fetchRecentFixtures();
     }, []);
@@ -43,14 +42,14 @@ const App = () => {
         <div className="min-h-screen bg-gray-900 text-white p-6">
             <header className="text-center py-10">
                 <h1 className="text-4xl font-extrabold text-blue-400">
-                    Online League for Autodarts
+                    Online League with Autodarts
                 </h1>
-                <a
+                {/* <a
                     href="https://discord.gg/YOUR_LINK"
                     className="mt-6 inline-block bg-blue-600 text-white px-6 py-2 rounded-full hover:bg-blue-700 transition"
                 >
                     Join via Discord
-                </a>
+                </a> */}
             </header>
 
             <section className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-7xl mx-auto">
@@ -135,7 +134,12 @@ const App = () => {
                                                     className="hover:bg-gray-800"
                                                 >
                                                     <td className="p-2">
-                                                        {player.name.trim()}
+                                                        <a
+                                                            href={`/player/${player.id}`}
+                                                            className="text-blue-400 hover:underline"
+                                                        >
+                                                            {player.name.trim()}
+                                                        </a>
                                                     </td>
                                                     <td className="p-2">
                                                         {player.played}
