@@ -10,6 +10,8 @@ const PlayerPage = () => {
     const [playerDivision, setPlayerDivision] = React.useState(null);
     const [matches, setMatches] = React.useState([]);
     const [aggregatedStats, setAggregatedStats] = React.useState(null);
+    const [loadingStats, setLoadingStats] = React.useState(true);
+    const [loadingMatches, setLoadingMatches] = React.useState(true);
     // 🔁 Fake test data
     const divisionName = "Division 2";
     const table = [
@@ -26,85 +28,59 @@ const PlayerPage = () => {
     // 🔁 Fetch player dat
     //from useeffect with /api/user-name?challonge_id=
     useEffect(() => {
-        const fetchPlayerName = async () => {
+        const fetchAll = async () => {
+            setLoadingStats(true);
+            setLoadingMatches(true);
             try {
-                const response = await fetch(
-                    `${
-                        import.meta.env.VITE_API_URL
-                    }/user-name?challonge_id=${id}`
-                );
-                console.log(
-                    `${
-                        import.meta.env.VITE_API_URL
-                    }/user-name?challonge_id=${id}`
-                );
-                if (!response.ok) {
-                    throw new Error("Network response was not ok");
-                }
-                const data = await response.json();
-                setPlayerName(data.name);
-            } catch (error) {
-                console.error("Error fetching player name:", error);
-            }
-        };
-        const fetchStandings = async () => {
-            try {
-                const response = await fetch(
-                    `${
-                        import.meta.env.VITE_API_URL
-                    }/tournament-standings/15864815`
-                );
-                if (!response.ok) {
-                    throw new Error("Network response was not ok");
-                }
-                const data = await response.json();
-                setStandings(data);
+                const api = import.meta.env.VITE_API_URL;
 
-                // Find the division the player is in
-                const division = data.divisions.find((div) =>
+                // 🔹 Player name
+                const nameRes = await fetch(
+                    `${api}/user-name?challonge_id=${id}`
+                );
+                if (!nameRes.ok) throw new Error("Failed to fetch name");
+                const nameData = await nameRes.json();
+                setPlayerName(nameData.name);
+
+                // 🔹 Standings
+                const standingsRes = await fetch(
+                    `${api}/tournament-standings/${tournamentId}`
+                );
+                if (!standingsRes.ok)
+                    throw new Error("Failed to fetch standings");
+                const standingsData = await standingsRes.json();
+                setStandings(standingsData);
+
+                const division = standingsData.divisions.find((div) =>
                     div.players.some((p) => p.id === id)
                 );
                 setPlayerDivision(division || null);
-            } catch (error) {
-                console.error("Error fetching standings:", error);
-            }
-        };
-        const fetchMatches = async () => {
-            try {
-                const response = await fetch(
-                    `${
-                        import.meta.env.VITE_API_URL
-                    }/recent-matches?challonge_id=${id}`
+
+                // 🔹 Matches
+                const matchRes = await fetch(
+                    `${api}/recent-matches?challonge_id=${id}`
                 );
-                if (!response.ok) throw new Error("Failed to fetch matches");
-                const data = await response.json();
-                setMatches(data.matches);
+                if (!matchRes.ok) throw new Error("Failed to fetch matches");
+                const matchData = await matchRes.json();
+                setMatches(matchData.matches);
+
+                // 🔹 Aggregates
+                const aggRes = await fetch(
+                    `${api}/player-aggregates?tournament_id=${tournamentId}&challonge_id=${id}`
+                );
+                if (!aggRes.ok) throw new Error("Failed to fetch aggregates");
+                const aggData = await aggRes.json();
+                setAggregatedStats(aggData);
             } catch (err) {
-                console.error("Error fetching matches:", err);
-            }
-        };
-        const fetchAggregates = async () => {
-            try {
-                const response = await fetch(
-                    `${
-                        import.meta.env.VITE_API_URL
-                    }/player-aggregates?tournament_id=${tournamentId}&challonge_id=${id}`
-                );
-                if (!response.ok)
-                    throw new Error("Failed to fetch aggregated stats");
-                const data = await response.json();
-                setAggregatedStats(data);
-            } catch (error) {
-                console.error("Error fetching aggregated stats:", error);
+                console.error("Error fetching player page data:", err);
+            } finally {
+                setLoadingStats(false);
+                setLoadingMatches(false);
             }
         };
 
-        fetchAggregates();
-
-        fetchPlayerName();
-        fetchStandings();
-        fetchMatches(); // 👈 Add this
-    }, [id]);
+        fetchAll();
+    }, [id, tournamentId]);
 
     return (
         <div className="min-h-screen bg-gray-900 text-white p-6">
@@ -221,7 +197,11 @@ const PlayerPage = () => {
                             Recent Matches
                         </h2>
                         <ul className="space-y-2">
-                            {matches.length > 0 ? (
+                            {loadingMatches ? (
+                                <div className="flex justify-center py-4">
+                                    <div className="w-6 h-6 border-4 border-blue-400 border-t-transparent rounded-full animate-spin"></div>
+                                </div>
+                            ) : matches.length > 0 ? (
                                 <ul className="space-y-2">
                                     {matches.map((match, i) => (
                                         <li
@@ -274,7 +254,11 @@ const PlayerPage = () => {
                     <h2 className="text-xl font-semibold mb-4 text-center">
                         Stats Summary
                     </h2>
-                    {aggregatedStats ? (
+                    {loadingStats ? (
+                        <div className="flex justify-center py-4">
+                            <div className="w-6 h-6 border-4 border-blue-400 border-t-transparent rounded-full animate-spin"></div>
+                        </div>
+                    ) : aggregatedStats ? (
                         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 text-sm">
                             <Stat
                                 label="Matches Played"
