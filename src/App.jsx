@@ -1,7 +1,9 @@
 import React from "react";
 import "./index.css";
+import { useNavigate } from "react-router-dom";
 
 const App = () => {
+    const navigate = useNavigate();
     //do a test fetch from https://adleague-web-api-dev.azurewebsites.net/api/webtest
     const [standings, setStandings] = React.useState(null);
     const [selectedDivision, setSelectedDivision] = React.useState(null);
@@ -131,15 +133,15 @@ const App = () => {
                                             {division.players.map((player) => (
                                                 <tr
                                                     key={player.id}
-                                                    className="hover:bg-gray-800"
+                                                    onClick={() =>
+                                                        navigate(
+                                                            `/player/${player.id}`
+                                                        )
+                                                    }
+                                                    className="hover:bg-gray-800 cursor-pointer transition"
                                                 >
                                                     <td className="p-2">
-                                                        <a
-                                                            href={`/player/${player.id}`}
-                                                            className="text-blue-400 hover:underline"
-                                                        >
-                                                            {player.name.trim()}
-                                                        </a>
+                                                        {player.name.trim()}
                                                     </td>
                                                     <td className="p-2">
                                                         {player.played}

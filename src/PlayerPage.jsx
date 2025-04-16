@@ -9,6 +9,7 @@ const PlayerPage = () => {
     const [standings, setStandings] = React.useState([]);
     const [playerDivision, setPlayerDivision] = React.useState(null);
     const [matches, setMatches] = React.useState([]);
+    const [aggregatedStats, setAggregatedStats] = React.useState(null);
     // 🔁 Fake test data
     const divisionName = "Division 2";
     const table = [
@@ -16,7 +17,12 @@ const PlayerPage = () => {
         { name: "kebab_kebab", played: 5, wins: 3, losses: 2, points: 13 },
         { name: "yakoob19", played: 5, wins: 3, losses: 2, points: 11 },
     ];
-
+    const Stat = ({ label, value }) => (
+        <div className="bg-gray-700 p-3 rounded text-center">
+            <div className="text-xs text-gray-400">{label}</div>
+            <div className="text-lg font-bold text-white">{value ?? "-"}</div>
+        </div>
+    );
     // 🔁 Fetch player dat
     //from useeffect with /api/user-name?challonge_id=
     useEffect(() => {
@@ -77,6 +83,23 @@ const PlayerPage = () => {
                 console.error("Error fetching matches:", err);
             }
         };
+        const fetchAggregates = async () => {
+            try {
+                const response = await fetch(
+                    `${
+                        import.meta.env.VITE_API_URL
+                    }/player-aggregates?tournament_id=${tournamentId}&challonge_id=${id}`
+                );
+                if (!response.ok)
+                    throw new Error("Failed to fetch aggregated stats");
+                const data = await response.json();
+                setAggregatedStats(data);
+            } catch (error) {
+                console.error("Error fetching aggregated stats:", error);
+            }
+        };
+
+        fetchAggregates();
 
         fetchPlayerName();
         fetchStandings();
@@ -247,11 +270,70 @@ const PlayerPage = () => {
                 </div>
 
                 {/* Full-width Stats Box */}
-                <div className="bg-gray-800 p-6 rounded shadow text-center">
-                    <h2 className="text-xl font-semibold mb-2">Stats</h2>
-                    <p className="text-gray-400 italic">
-                        Stats view is a work in progress.
-                    </p>
+                <div className="bg-gray-800 p-6 rounded shadow">
+                    <h2 className="text-xl font-semibold mb-4 text-center">
+                        Stats Summary
+                    </h2>
+                    {aggregatedStats ? (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 text-sm">
+                            <Stat
+                                label="Matches Played"
+                                value={aggregatedStats.matches_played}
+                            />
+                            <Stat
+                                label="Legs Played"
+                                value={aggregatedStats.legs_played}
+                            />
+                            <Stat
+                                label="Darts Thrown"
+                                value={aggregatedStats.darts_thrown}
+                            />
+                            <Stat
+                                label="Total Score"
+                                value={aggregatedStats.total_score}
+                            />
+                            <Stat
+                                label="3 Dart Avg"
+                                value={aggregatedStats.three_dart_avg?.toFixed(
+                                    2
+                                )}
+                            />
+                            <Stat
+                                label="First 9 Avg"
+                                value={aggregatedStats.first9_avg?.toFixed(2)}
+                            />
+                            <Stat
+                                label="Scores 60+"
+                                value={aggregatedStats.scores_60_plus}
+                            />
+                            <Stat
+                                label="Scores 100+"
+                                value={aggregatedStats.scores_100_plus}
+                            />
+                            <Stat
+                                label="Scores 140+"
+                                value={aggregatedStats.scores_140_plus}
+                            />
+                            <Stat
+                                label="Scores 180"
+                                value={aggregatedStats.scores_180}
+                            />
+                            <Stat
+                                label="Checkouts"
+                                value={`${aggregatedStats.checkouts_hit}/${aggregatedStats.checkout_attempts}`}
+                            />
+                            <Stat
+                                label="Checkout %"
+                                value={`${(
+                                    aggregatedStats.checkout_pct * 100
+                                ).toFixed(1)}%`}
+                            />
+                        </div>
+                    ) : (
+                        <p className="text-gray-400 italic text-center">
+                            Loading stats...
+                        </p>
+                    )}
                 </div>
             </div>
         </div>
