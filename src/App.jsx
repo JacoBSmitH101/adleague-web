@@ -166,6 +166,11 @@ const App = () => {
                 <section id="results">
                     <h2 className="text-2xl font-bold mb-4">Recent Results</h2>
                     <ul className="space-y-2">
+                        {recentFixtures.length === 0 ? (
+                            <div className="flex justify-center py-4">
+                                <div className="w-6 h-6 border-4 border-blue-400 border-t-transparent rounded-full animate-spin"></div>
+                            </div>
+                        ) : null}
                         {recentFixtures.map((fixture) => {
                             const p1 = fixture.player1;
                             const p2 = fixture.player2;
