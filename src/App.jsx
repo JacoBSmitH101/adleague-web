@@ -9,6 +9,21 @@ const App = () => {
     const [selectedDivision, setSelectedDivision] = React.useState(null);
     const [recentFixtures, setRecentFixtures] = React.useState([]);
     const apiUrl = import.meta.env.VITE_API_URL;
+    const [weeklyFixtures, setWeeklyFixtures] = React.useState([]);
+    const [loadingFixtures, setLoadingFixtures] = React.useState(true);
+    const getCurrentWeek = () => {
+        const referenceDate = new Date("2025-04-13"); // start of week 6
+        const now = new Date();
+        const diffDays = Math.floor(
+            (now - referenceDate) / (1000 * 60 * 60 * 24)
+        );
+        return 6 + Math.floor(diffDays / 7);
+    };
+
+    const [currentWeek, setCurrentWeek] = React.useState(getCurrentWeek());
+
+    // Calculate current week based on reference date
+
     const fetchStandings = async () => {
         try {
             const response = await fetch(
@@ -36,9 +51,25 @@ const App = () => {
         }
     };
 
+    const fetchWeeklyFixtures = async () => {
+        try {
+            const res = await fetch(`${apiUrl}/weekly-fixtures/${import.meta.env.VITE_TOURNAMENT_ID}`);
+            const data = await res.json();
+            const filtered = data.divisions.map((div) => ({
+                name: div.name,
+                matches: div.matches.filter((m) => m.week === currentWeek),
+            }));
+            setWeeklyFixtures(filtered);
+        } catch (err) {
+            console.error("Error fetching weekly fixtures:", err);
+        } finally {
+            setLoadingFixtures(false);
+        }
+    };
     React.useEffect(() => {
         fetchStandings();
         fetchRecentFixtures();
+        fetchWeeklyFixtures();
     }, []);
     return (
         <div className="min-h-screen bg-gray-900 text-white p-6">
@@ -56,7 +87,8 @@ const App = () => {
 
             <section className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-7xl mx-auto">
                 <a
-                    href="#fixtures"
+                    href=""
+                    onClick={() => navigate("/weekly-fixtures")}
                     className="bg-gray-800 hover:bg-gray-700 transition rounded-xl p-6 text-center shadow-lg"
                 >
                     <div className="text-blue-400 text-4xl mb-2">📅</div>
@@ -66,7 +98,8 @@ const App = () => {
                     </p>
                 </a>
                 <a
-                    href="#standings"
+                    href=""
+                    onClick={() => navigate("/all-standings")}
                     className="bg-gray-800 hover:bg-gray-700 transition rounded-xl p-6 text-center shadow-lg"
                 >
                     <div className="text-blue-400 text-4xl mb-2">📈</div>
@@ -74,7 +107,8 @@ const App = () => {
                     <p className="text-sm text-gray-300">League tables</p>
                 </a>
                 <a
-                    href="#stats"
+                    href=""
+                    onClick={() => alert("Coming soon!")}
                     className="bg-gray-800 hover:bg-gray-700 transition rounded-xl p-6 text-center shadow-lg"
                 >
                     <div className="text-blue-400 text-4xl mb-2">📊</div>
@@ -166,6 +200,11 @@ const App = () => {
                 <section id="results">
                     <h2 className="text-2xl font-bold mb-4">Recent Results</h2>
                     <ul className="space-y-2">
+                        {recentFixtures.length === 0 ? (
+                            <div className="flex justify-center py-4">
+                                <div className="w-6 h-6 border-4 border-blue-400 border-t-transparent rounded-full animate-spin"></div>
+                            </div>
+                        ) : null}
                         {recentFixtures.map((fixture) => {
                             const p1 = fixture.player1;
                             const p2 = fixture.player2;
@@ -211,11 +250,99 @@ const App = () => {
 
                 <section id="fixtures">
                     <h2 className="text-2xl font-bold mb-4">
-                        Upcoming Fixtures
+                        Week {currentWeek} Fixtures
                     </h2>
-                    <div className="p-4 bg-gray-800 rounded shadow text-center text-gray-300 italic">
-                        Upcoming fixtures view is a work in progress!
-                    </div>
+                    {loadingFixtures ? (
+                        <div className="flex justify-center py-4">
+                            <div className="w-6 h-6 border-4 border-blue-400 border-t-transparent rounded-full animate-spin"></div>
+                        </div>
+                    ) : (
+                        <div className="space-y-4">
+                            {weeklyFixtures.map((division) =>
+                                division.matches.length > 0 ? (
+                                    <div
+                                        key={division.name}
+                                        onClick={() =>
+                                            navigate(
+                                                `/weekly-fixtures?division=${division.name}&week=${currentWeek}`
+                                            )
+                                        }
+                                        className="flex bg-gray-800 rounded shadow overflow-hidden cursor-pointer hover:ring-2 hover:ring-blue-500 transition"
+                                    >
+                                        {/* Rotated Division Label */}
+                                        <div className="bg-gray-700 text-center w-20 flex items-center justify-center">
+                                            <span className="transform -rotate-90 text-blue-300 font-bold text-m tracking-wider">
+                                                {"Div " +
+                                                    division.name[
+                                                        division.name.length - 1
+                                                    ]}
+                                            </span>
+                                        </div>
+
+                                        {/* Match List */}
+                                        <ul className="flex-1 py-2 px-4 space-y-1">
+                                            {division.matches.map((match) => {
+                                                const hasResult =
+                                                    match.result &&
+                                                    match.result.includes(
+                                                        "-"
+                                                    ) &&
+                                                    match.result.split("-")
+                                                        .length === 2;
+
+                                                let p1Class = "text-gray-200";
+                                                let p2Class = "text-gray-200";
+
+                                                if (hasResult) {
+                                                    const [s1, s2] =
+                                                        match.result
+                                                            .split("-")
+                                                            .map(Number);
+                                                    if (
+                                                        !isNaN(s1) &&
+                                                        !isNaN(s2)
+                                                    ) {
+                                                        p1Class =
+                                                            s1 > s2
+                                                                ? "text-green-400 font-bold"
+                                                                : "text-red-400 font-bold";
+                                                        p2Class =
+                                                            s2 > s1
+                                                                ? "text-green-400 font-bold"
+                                                                : "text-red-400 font-bold";
+                                                    }
+                                                }
+
+                                                return (
+                                                    <li
+                                                        key={match.match_id}
+                                                        className="text-m text-center"
+                                                    >
+                                                        <span
+                                                            className={p1Class}
+                                                        >
+                                                            {match.player1_name}
+                                                        </span>{" "}
+                                                        vs{" "}
+                                                        <span
+                                                            className={p2Class}
+                                                        >
+                                                            {match.player2_name}
+                                                        </span>
+                                                        {hasResult && (
+                                                            <span className="text-gray-400 ml-1">
+                                                                — {match.result}
+                                                            </span>
+                                                        )}
+                                                    </li>
+                                                );
+                                            })}
+                                        </ul>
+                                    </div>
+                                ) : null
+                            )}
+                        </div>
+                    )}
                 </section>
             </main>
         </div>
