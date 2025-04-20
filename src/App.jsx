@@ -53,7 +53,7 @@ const App = () => {
 
     const fetchWeeklyFixtures = async () => {
         try {
-            const res = await fetch(`${apiUrl}/weekly-fixtures/15864815`);
+            const res = await fetch(`${apiUrl}/weekly-fixtures/${import.meta.env.VITE_TOURNAMENT_ID}`);
             const data = await res.json();
             const filtered = data.divisions.map((div) => ({
                 name: div.name,
