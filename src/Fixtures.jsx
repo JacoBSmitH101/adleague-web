@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 const WeeklyFixturesPage = () => {
     const [fixtures, setFixtures] = useState([]);
+    const location = useLocation();
+
     const [selectedDivision, setSelectedDivision] = useState("");
     const [currentWeek, setCurrentWeek] = useState(1);
     const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -12,32 +14,44 @@ const WeeklyFixturesPage = () => {
 
     // ✅ Fix dynamic week calculation
     useEffect(() => {
-        const leagueStart = new Date("2025-03-04"); // 📌 use actual 2025 league start
-        const today = new Date();
-        const diffInDays = Math.floor(
-            (today - leagueStart) / (1000 * 60 * 60 * 24)
-        );
-        const week = Math.max(1, Math.floor(diffInDays / 7) + 1);
-        setCurrentWeek(week);
-    }, []);
+        const init = async () => {
+            // 🗓️ Dynamic week based on start date
+            const leagueStart = new Date("2025-03-04");
+            const today = new Date();
+            const diffInDays = Math.floor(
+                (today - leagueStart) / (1000 * 60 * 60 * 24)
+            );
+            const calculatedWeek = Math.max(1, Math.floor(diffInDays / 7) + 1);
 
-    useEffect(() => {
-        const fetchFixtures = async () => {
+            // 🌐 Check for URL params
+            const params = new URLSearchParams(location.search);
+            const divisionParam = params.get("division");
+            const weekParam = parseInt(params.get("week"));
+            const initialWeek =
+                !isNaN(weekParam) && weekParam > 0 ? weekParam : calculatedWeek;
+
+            setCurrentWeek(initialWeek);
+
             try {
                 const res = await fetch(
                     `${apiUrl}/weekly-fixtures/${tournamentId}`
                 );
                 const data = await res.json();
                 setFixtures(data.divisions);
-                if (data.divisions.length > 0) {
-                    setSelectedDivision(data.divisions[0].name);
-                }
+
+                const availableDivNames = data.divisions.map((d) => d.name);
+                const validDiv = availableDivNames.includes(divisionParam)
+                    ? divisionParam
+                    : data.divisions[0]?.name;
+
+                setSelectedDivision(validDiv);
             } catch (err) {
                 console.error("Error fetching fixtures:", err);
             }
         };
-        fetchFixtures();
-    }, [tournamentId]);
+
+        init();
+    }, [apiUrl, tournamentId, location.search]);
 
     const handlePrevWeek = () => {
         setCurrentWeek((prev) => Math.max(1, prev - 1));

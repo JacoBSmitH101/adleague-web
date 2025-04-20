@@ -98,7 +98,8 @@ const App = () => {
                     </p>
                 </a>
                 <a
-                    href="#standings"
+                    href=""
+                    onClick={() => navigate("/all-standings")}
                     className="bg-gray-800 hover:bg-gray-700 transition rounded-xl p-6 text-center shadow-lg"
                 >
                     <div className="text-blue-400 text-4xl mb-2">📈</div>
@@ -106,7 +107,8 @@ const App = () => {
                     <p className="text-sm text-gray-300">League tables</p>
                 </a>
                 <a
-                    href="#stats"
+                    href=""
+                    onClick={() => alert("Coming soon!")}
                     className="bg-gray-800 hover:bg-gray-700 transition rounded-xl p-6 text-center shadow-lg"
                 >
                     <div className="text-blue-400 text-4xl mb-2">📊</div>
@@ -260,7 +262,12 @@ const App = () => {
                                 division.matches.length > 0 ? (
                                     <div
                                         key={division.name}
-                                        className="flex bg-gray-800 rounded shadow overflow-hidden"
+                                        onClick={() =>
+                                            navigate(
+                                                `/weekly-fixtures?division=${division.name}&week=${currentWeek}`
+                                            )
+                                        }
+                                        className="flex bg-gray-800 rounded shadow overflow-hidden cursor-pointer hover:ring-2 hover:ring-blue-500 transition"
                                     >
                                         {/* Rotated Division Label */}
                                         <div className="bg-gray-700 text-center w-20 flex items-center justify-center">
@@ -291,7 +298,6 @@ const App = () => {
                                                         match.result
                                                             .split("-")
                                                             .map(Number);
-
                                                     if (
                                                         !isNaN(s1) &&
                                                         !isNaN(s2)
@@ -310,7 +316,7 @@ const App = () => {
                                                 return (
                                                     <li
                                                         key={match.match_id}
-                                                        className=" text-m text-center"
+                                                        className="text-m text-center"
                                                     >
                                                         <span
                                                             className={p1Class}
