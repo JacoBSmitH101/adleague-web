@@ -20,7 +20,7 @@ const App = () => {
         return 6 + Math.floor(diffDays / 7);
     };
 
-    const [currentWeek, setCurrentWeek] = React.useState(getCurrentWeek() - 2);
+    const [currentWeek, setCurrentWeek] = React.useState(getCurrentWeek());
 
     // Calculate current week based on reference date
 
@@ -255,64 +255,87 @@ const App = () => {
                             <div className="w-6 h-6 border-4 border-blue-400 border-t-transparent rounded-full animate-spin"></div>
                         </div>
                     ) : (
-                        weeklyFixtures.map((division) =>
-                            division.matches.length > 0 ? (
-                                <div key={division.name} className="mb-4">
-                                    <h3 className="text-lg font-semibold text-blue-300 mb-2">
-                                        {division.name}
-                                    </h3>
-                                    <ul className="space-y-1 text-sm text-gray-200">
-                                        {division.matches.map((match) => {
-                                            const hasResult =
-                                                match.result &&
-                                                match.result.includes("-") &&
-                                                match.result.split("-")
-                                                    .length === 2;
+                        <div className="space-y-4">
+                            {weeklyFixtures.map((division) =>
+                                division.matches.length > 0 ? (
+                                    <div
+                                        key={division.name}
+                                        className="flex bg-gray-800 rounded shadow overflow-hidden"
+                                    >
+                                        {/* Rotated Division Label */}
+                                        <div className="bg-gray-700 text-center w-20 flex items-center justify-center">
+                                            <span className="transform -rotate-90 text-blue-300 font-bold text-m tracking-wider">
+                                                {"Div " +
+                                                    division.name[
+                                                        division.name.length - 1
+                                                    ]}
+                                            </span>
+                                        </div>
 
-                                            let p1Class = "text-gray-200";
-                                            let p2Class = "text-gray-200";
+                                        {/* Match List */}
+                                        <ul className="flex-1 py-2 px-4 space-y-1">
+                                            {division.matches.map((match) => {
+                                                const hasResult =
+                                                    match.result &&
+                                                    match.result.includes(
+                                                        "-"
+                                                    ) &&
+                                                    match.result.split("-")
+                                                        .length === 2;
 
-                                            if (hasResult) {
-                                                const [s1, s2] = match.result
-                                                    .split("-")
-                                                    .map(Number);
+                                                let p1Class = "text-gray-200";
+                                                let p2Class = "text-gray-200";
 
-                                                if (!isNaN(s1) && !isNaN(s2)) {
-                                                    p1Class =
-                                                        s1 > s2
-                                                            ? "text-green-400 font-bold"
-                                                            : "text-red-400 font-bold";
-                                                    p2Class =
-                                                        s2 > s1
-                                                            ? "text-green-400 font-bold"
-                                                            : "text-red-400 font-bold";
+                                                if (hasResult) {
+                                                    const [s1, s2] =
+                                                        match.result
+                                                            .split("-")
+                                                            .map(Number);
+
+                                                    if (
+                                                        !isNaN(s1) &&
+                                                        !isNaN(s2)
+                                                    ) {
+                                                        p1Class =
+                                                            s1 > s2
+                                                                ? "text-green-400 font-bold"
+                                                                : "text-red-400 font-bold";
+                                                        p2Class =
+                                                            s2 > s1
+                                                                ? "text-green-400 font-bold"
+                                                                : "text-red-400 font-bold";
+                                                    }
                                                 }
-                                            }
 
-                                            return (
-                                                <li
-                                                    key={match.match_id}
-                                                    className="bg-gray-800 p-2 rounded shadow text-center"
-                                                >
-                                                    <span className={p1Class}>
-                                                        {match.player1_name}
-                                                    </span>{" "}
-                                                    vs{" "}
-                                                    <span className={p2Class}>
-                                                        {match.player2_name}
-                                                    </span>
-                                                    {hasResult && (
-                                                        <span className="text-gray-400 ml-1">
-                                                            — {match.result}
+                                                return (
+                                                    <li
+                                                        key={match.match_id}
+                                                        className=" text-m text-center"
+                                                    >
+                                                        <span
+                                                            className={p1Class}
+                                                        >
+                                                            {match.player1_name}
+                                                        </span>{" "}
+                                                        vs{" "}
+                                                        <span
+                                                            className={p2Class}
+                                                        >
+                                                            {match.player2_name}
                                                         </span>
-                                                    )}
-                                                </li>
-                                            );
-                                        })}
-                                    </ul>
-                                </div>
-                            ) : null
-                        )
+                                                        {hasResult && (
+                                                            <span className="text-gray-400 ml-1">
+                                                                — {match.result}
+                                                            </span>
+                                                        )}
+                                                    </li>
+                                                );
+                                            })}
+                                        </ul>
+                                    </div>
+                                ) : null
+                            )}
+                        </div>
                     )}
                 </section>
             </main>
