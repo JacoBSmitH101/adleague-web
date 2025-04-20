@@ -9,6 +9,21 @@ const App = () => {
     const [selectedDivision, setSelectedDivision] = React.useState(null);
     const [recentFixtures, setRecentFixtures] = React.useState([]);
     const apiUrl = import.meta.env.VITE_API_URL;
+    const [weeklyFixtures, setWeeklyFixtures] = React.useState([]);
+    const [loadingFixtures, setLoadingFixtures] = React.useState(true);
+    const getCurrentWeek = () => {
+        const referenceDate = new Date("2025-04-13"); // start of week 6
+        const now = new Date();
+        const diffDays = Math.floor(
+            (now - referenceDate) / (1000 * 60 * 60 * 24)
+        );
+        return 6 + Math.floor(diffDays / 7);
+    };
+
+    const [currentWeek, setCurrentWeek] = React.useState(getCurrentWeek());
+
+    // Calculate current week based on reference date
+
     const fetchStandings = async () => {
         try {
             const response = await fetch(
@@ -36,9 +51,25 @@ const App = () => {
         }
     };
 
+    const fetchWeeklyFixtures = async () => {
+        try {
+            const res = await fetch(`${apiUrl}/weekly-fixtures/15864815`);
+            const data = await res.json();
+            const filtered = data.divisions.map((div) => ({
+                name: div.name,
+                matches: div.matches.filter((m) => m.week === currentWeek),
+            }));
+            setWeeklyFixtures(filtered);
+        } catch (err) {
+            console.error("Error fetching weekly fixtures:", err);
+        } finally {
+            setLoadingFixtures(false);
+        }
+    };
     React.useEffect(() => {
         fetchStandings();
         fetchRecentFixtures();
+        fetchWeeklyFixtures();
     }, []);
     return (
         <div className="min-h-screen bg-gray-900 text-white p-6">
@@ -56,7 +87,8 @@ const App = () => {
 
             <section className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-7xl mx-auto">
                 <a
-                    href="#fixtures"
+                    href=""
+                    onClick={() => navigate("/weekly-fixtures")}
                     className="bg-gray-800 hover:bg-gray-700 transition rounded-xl p-6 text-center shadow-lg"
                 >
                     <div className="text-blue-400 text-4xl mb-2">📅</div>
@@ -216,11 +248,34 @@ const App = () => {
 
                 <section id="fixtures">
                     <h2 className="text-2xl font-bold mb-4">
-                        Upcoming Fixtures
+                        Week {currentWeek} Fixtures
                     </h2>
-                    <div className="p-4 bg-gray-800 rounded shadow text-center text-gray-300 italic">
-                        Upcoming fixtures view is a work in progress!
-                    </div>
+                    {loadingFixtures ? (
+                        <div className="flex justify-center py-4">
+                            <div className="w-6 h-6 border-4 border-blue-400 border-t-transparent rounded-full animate-spin"></div>
+                        </div>
+                    ) : (
+                        weeklyFixtures.map((division) =>
+                            division.matches.length > 0 ? (
+                                <div key={division.name} className="mb-4">
+                                    <h3 className="text-lg font-semibold text-blue-300 mb-2">
+                                        {division.name}
+                                    </h3>
+                                    <ul className="space-y-1 text-sm text-gray-200">
+                                        {division.matches.map((match) => (
+                                            <li
+                                                key={match.match_id}
+                                                className="bg-gray-800 p-2 rounded shadow text-center"
+                                            >
+                                                {match.player1_name} vs{" "}
+                                                {match.player2_name}
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </div>
+                            ) : null
+                        )
+                    )}
                 </section>
             </main>
         </div>
