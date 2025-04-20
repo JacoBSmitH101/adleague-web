@@ -20,7 +20,7 @@ const App = () => {
         return 6 + Math.floor(diffDays / 7);
     };
 
-    const [currentWeek, setCurrentWeek] = React.useState(getCurrentWeek());
+    const [currentWeek, setCurrentWeek] = React.useState(getCurrentWeek() - 2);
 
     // Calculate current week based on reference date
 
@@ -262,15 +262,53 @@ const App = () => {
                                         {division.name}
                                     </h3>
                                     <ul className="space-y-1 text-sm text-gray-200">
-                                        {division.matches.map((match) => (
-                                            <li
-                                                key={match.match_id}
-                                                className="bg-gray-800 p-2 rounded shadow text-center"
-                                            >
-                                                {match.player1_name} vs{" "}
-                                                {match.player2_name}
-                                            </li>
-                                        ))}
+                                        {division.matches.map((match) => {
+                                            const hasResult =
+                                                match.result &&
+                                                match.result.includes("-") &&
+                                                match.result.split("-")
+                                                    .length === 2;
+
+                                            let p1Class = "text-gray-200";
+                                            let p2Class = "text-gray-200";
+
+                                            if (hasResult) {
+                                                const [s1, s2] = match.result
+                                                    .split("-")
+                                                    .map(Number);
+
+                                                if (!isNaN(s1) && !isNaN(s2)) {
+                                                    p1Class =
+                                                        s1 > s2
+                                                            ? "text-green-400 font-bold"
+                                                            : "text-red-400 font-bold";
+                                                    p2Class =
+                                                        s2 > s1
+                                                            ? "text-green-400 font-bold"
+                                                            : "text-red-400 font-bold";
+                                                }
+                                            }
+
+                                            return (
+                                                <li
+                                                    key={match.match_id}
+                                                    className="bg-gray-800 p-2 rounded shadow text-center"
+                                                >
+                                                    <span className={p1Class}>
+                                                        {match.player1_name}
+                                                    </span>{" "}
+                                                    vs{" "}
+                                                    <span className={p2Class}>
+                                                        {match.player2_name}
+                                                    </span>
+                                                    {hasResult && (
+                                                        <span className="text-gray-400 ml-1">
+                                                            — {match.result}
+                                                        </span>
+                                                    )}
+                                                </li>
+                                            );
+                                        })}
                                     </ul>
                                 </div>
                             ) : null
