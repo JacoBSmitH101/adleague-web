@@ -58,11 +58,11 @@ const PlayerPage = () => {
 
                 // 🔹 Matches
                 const matchRes = await fetch(
-                    `${api}/recent-matches?challonge_id=${id}`
+                    `${api}/recent-fixtures?challonge_id=${id}`
                 );
                 if (!matchRes.ok) throw new Error("Failed to fetch matches");
                 const matchData = await matchRes.json();
-                setMatches(matchData.matches);
+                setMatches(matchData.fixtures);
 
                 // 🔹 Aggregates
                 const aggRes = await fetch(
@@ -191,61 +191,116 @@ const PlayerPage = () => {
                         )}
                     </div>
 
-                    {/* Match List */}
+                    {/* Played & Upcoming Matches Section */}
                     <div className="bg-gray-800 p-4 rounded shadow">
-                        <h2 className="text-xl font-semibold mb-4">
-                            Recent Matches
+                        {/* Card title */}
+                        <h2 className="text-xl font-semibold mb-2 text-center">
+                            Matches
                         </h2>
-                        <ul className="space-y-2">
-                            {loadingMatches ? (
-                                <div className="flex justify-center py-4">
-                                    <div className="w-6 h-6 border-4 border-blue-400 border-t-transparent rounded-full animate-spin"></div>
-                                </div>
-                            ) : matches.length > 0 ? (
-                                <ul className="space-y-2">
-                                    {matches.map((match, i) => (
-                                        <li
-                                            key={i}
-                                            className="p-2 bg-gray-700 rounded flex flex-col sm:flex-row sm:justify-between sm:items-center"
-                                        >
-                                            <div>
-                                                vs{" "}
-                                                <span className="text-blue-300 font-semibold">
-                                                    {match.opponent}
-                                                </span>{" "}
-                                                — {match.score}
-                                            </div>
-                                            <div className="flex gap-4 mt-1 sm:mt-0">
-                                                <span
-                                                    className={
-                                                        match.result === "Win"
-                                                            ? "text-green-400 font-bold"
-                                                            : "text-red-400 font-bold"
-                                                    }
-                                                >
-                                                    {match.result}
-                                                </span>
-                                                <span className="text-gray-400 text-sm">
-                                                    {new Date(
-                                                        match.date
-                                                    ).toLocaleDateString(
-                                                        "en-GB",
-                                                        {
-                                                            day: "numeric",
-                                                            month: "short",
-                                                        }
-                                                    )}
-                                                </span>
-                                            </div>
+
+                        {/* Section Loop: Played + Upcoming */}
+                        {[
+                            {
+                                label: "Played",
+                                data: matches.filter(
+                                    (m) => m.state === "complete"
+                                ),
+                            },
+                            {
+                                label: "Upcoming",
+                                data: matches.filter(
+                                    (m) => m.state !== "complete"
+                                ),
+                            },
+                        ].map((section) => (
+                            <div key={section.label} className="mb-4">
+                                <h3 className="text-lg font-semibold text-blue-300 mb-2">
+                                    {section.label}
+                                </h3>
+                                <ul className="space-y-2 text-sm">
+                                    {loadingMatches ? (
+                                        <div className="flex justify-center py-4">
+                                            <div className="w-6 h-6 border-4 border-blue-400 border-t-transparent rounded-full animate-spin"></div>
+                                        </div>
+                                    ) : section.data.length === 0 ? (
+                                        <li className="text-gray-400 italic">
+                                            No {section.label.toLowerCase()}{" "}
+                                            matches
                                         </li>
-                                    ))}
+                                    ) : (
+                                        section.data.map((match, i) => {
+                                            const isPlayer1 =
+                                                match.player1.id ===
+                                                parseInt(id);
+                                            const opponent = isPlayer1
+                                                ? match.player2.name
+                                                : match.player1.name;
+                                            const playerScore = isPlayer1
+                                                ? match.player1.score
+                                                : match.player2.score;
+                                            const opponentScore = isPlayer1
+                                                ? match.player2.score
+                                                : match.player1.score;
+
+                                            const result =
+                                                typeof playerScore ===
+                                                    "number" &&
+                                                typeof opponentScore ===
+                                                    "number"
+                                                    ? `${playerScore}-${opponentScore}`
+                                                    : null;
+
+                                            const isWin =
+                                                playerScore > opponentScore;
+                                            const isDraw =
+                                                playerScore === opponentScore;
+                                            const hasResult = result !== null;
+
+                                            let resultColor = "text-gray-300";
+                                            if (hasResult) {
+                                                resultColor = isWin
+                                                    ? "text-green-400 font-bold"
+                                                    : isDraw
+                                                    ? "text-yellow-300 font-bold"
+                                                    : "text-red-400 font-bold";
+                                            }
+
+                                            return (
+                                                <li
+                                                    key={match.id}
+                                                    className="flex justify-between items-center bg-gray-700 p-2 rounded shadow"
+                                                >
+                                                    <div className="text-blue-300 font-semibold">
+                                                        vs {opponent}
+                                                    </div>
+                                                    <div className="flex gap-2 items-center">
+                                                        {hasResult ? (
+                                                            <span
+                                                                className={
+                                                                    resultColor
+                                                                }
+                                                            >
+                                                                {result}
+                                                            </span>
+                                                        ) : (
+                                                            <span className="text-gray-400 italic">
+                                                                Week{" "}
+                                                                {match.suggested_play_order
+                                                                    ? Math.ceil(
+                                                                          match.suggested_play_order /
+                                                                              4
+                                                                      )
+                                                                    : "?"}
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                </li>
+                                            );
+                                        })
+                                    )}
                                 </ul>
-                            ) : (
-                                <p className="text-gray-400 italic">
-                                    No recent matches found.
-                                </p>
-                            )}
-                        </ul>
+                            </div>
+                        ))}
                     </div>
                 </div>
 
