@@ -256,13 +256,44 @@ const PlayerPage = () => {
                                                 playerScore === opponentScore;
                                             const hasResult = result !== null;
 
+                                            const isForfeited =
+                                                match.state === "forfeit" ||
+                                                match.forfeit === true;
+
+                                            let resultDisplay = null;
                                             let resultColor = "text-gray-300";
-                                            if (hasResult) {
+
+                                            if (isForfeited) {
+                                                resultDisplay = (
+                                                    <span className="text-red-400 font-bold">
+                                                        FORFEIT
+                                                    </span>
+                                                );
+                                            } else if (hasResult) {
                                                 resultColor = isWin
                                                     ? "text-green-400 font-bold"
                                                     : isDraw
                                                     ? "text-yellow-300 font-bold"
                                                     : "text-red-400 font-bold";
+                                                resultDisplay = (
+                                                    <span
+                                                        className={resultColor}
+                                                    >
+                                                        {result}
+                                                    </span>
+                                                );
+                                            } else {
+                                                resultDisplay = (
+                                                    <span className="text-gray-400 italic">
+                                                        Week{" "}
+                                                        {match.suggested_play_order
+                                                            ? Math.ceil(
+                                                                  match.suggested_play_order /
+                                                                      4
+                                                              )
+                                                            : "?"}
+                                                    </span>
+                                                );
                                             }
 
                                             return (
@@ -274,25 +305,7 @@ const PlayerPage = () => {
                                                         vs {opponent}
                                                     </div>
                                                     <div className="flex gap-2 items-center">
-                                                        {hasResult ? (
-                                                            <span
-                                                                className={
-                                                                    resultColor
-                                                                }
-                                                            >
-                                                                {result}
-                                                            </span>
-                                                        ) : (
-                                                            <span className="text-gray-400 italic">
-                                                                Week{" "}
-                                                                {match.suggested_play_order
-                                                                    ? Math.ceil(
-                                                                          match.suggested_play_order /
-                                                                              4
-                                                                      )
-                                                                    : "?"}
-                                                            </span>
-                                                        )}
+                                                        {resultDisplay}
                                                     </div>
                                                 </li>
                                             );
