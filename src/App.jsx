@@ -53,7 +53,11 @@ const App = () => {
 
     const fetchWeeklyFixtures = async () => {
         try {
-            const res = await fetch(`${apiUrl}/weekly-fixtures/${import.meta.env.VITE_TOURNAMENT_ID}`);
+            const res = await fetch(
+                `${apiUrl}/weekly-fixtures/${
+                    import.meta.env.VITE_TOURNAMENT_ID
+                }`
+            );
             const data = await res.json();
             const filtered = data.divisions.map((div) => ({
                 name: div.name,
@@ -77,12 +81,10 @@ const App = () => {
                 <h1 className="text-4xl font-extrabold text-blue-400">
                     Online League with Autodarts
                 </h1>
-                {/* <a
-                    href="https://discord.gg/YOUR_LINK"
-                    className="mt-6 inline-block bg-blue-600 text-white px-6 py-2 rounded-full hover:bg-blue-700 transition"
-                >
-                    Join via Discord
-                </a> */}
+                <p className="text-sm text-gray-400 mt-2 italic">
+                    (Unofficial community league – not affiliated with
+                    Autodarts)
+                </p>
             </header>
 
             <section className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-7xl mx-auto">
@@ -175,7 +177,14 @@ const App = () => {
                                                     className="hover:bg-gray-800 cursor-pointer transition"
                                                 >
                                                     <td className="p-2">
-                                                        {player.name.trim()}
+                                                        {player.name.trim()}{" "}
+                                                        <span className="text-gray-400">
+                                                            (
+                                                            {player.avg
+                                                                ? player.avg
+                                                                : "n/a"}
+                                                            )
+                                                        </span>
                                                     </td>
                                                     <td className="p-2">
                                                         {player.played}
@@ -318,6 +327,15 @@ const App = () => {
                                                         key={match.match_id}
                                                         className="text-m text-center"
                                                     >
+                                                        {match.player1_avg && (
+                                                            <span className="text-gray-400 mr-1 text-sm">
+                                                                (
+                                                                {
+                                                                    match.player1_avg
+                                                                }
+                                                                )
+                                                            </span>
+                                                        )}
                                                         <span
                                                             className={p1Class}
                                                         >
@@ -329,6 +347,15 @@ const App = () => {
                                                         >
                                                             {match.player2_name}
                                                         </span>
+                                                        {match.player2_avg && (
+                                                            <span className="text-gray-400 ml-1 text-sm">
+                                                                (
+                                                                {
+                                                                    match.player2_avg
+                                                                }
+                                                                )
+                                                            </span>
+                                                        )}
                                                         {hasResult && (
                                                             <span className="text-gray-400 ml-1">
                                                                 — {match.result}
