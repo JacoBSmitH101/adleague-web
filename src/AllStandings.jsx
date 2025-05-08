@@ -100,7 +100,14 @@ const AllTablesPage = () => {
                                                 className="hover:bg-gray-900 cursor-pointer transition"
                                             >
                                                 <td className="p-2 text-left">
-                                                    {player.name.trim()}
+                                                    {player.name.trim()}{" "}
+                                                    <span className="text-gray-400">
+                                                        (
+                                                        {player.avg
+                                                            ? player.avg
+                                                            : "n/a"}
+                                                        )
+                                                    </span>
                                                 </td>
                                                 <td className="p-2 text-center">
                                                     {player.played}
