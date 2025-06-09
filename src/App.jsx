@@ -12,12 +12,12 @@ const App = () => {
     const [weeklyFixtures, setWeeklyFixtures] = React.useState([]);
     const [loadingFixtures, setLoadingFixtures] = React.useState(true);
     const getCurrentWeek = () => {
-        const referenceDate = new Date("2025-04-13"); // start of week 6
+        const referenceDate = new Date("2025-06-09"); // start of week 6
         const now = new Date();
         const diffDays = Math.floor(
             (now - referenceDate) / (1000 * 60 * 60 * 24)
         );
-        return 6 + Math.floor(diffDays / 7);
+        return 1 + Math.floor(diffDays / 7);
     };
 
     const [currentWeek, setCurrentWeek] = React.useState(getCurrentWeek());
@@ -27,7 +27,7 @@ const App = () => {
     const fetchStandings = async () => {
         try {
             const response = await fetch(
-                //"https://adleague-web-api-dev.azurewebsites.net/api/tournament-standings/15864815"
+                //"https://adleague-web-api-dev.azurewebsites.net/api/tournament-standings/16310779"
                 `${apiUrl}/tournament-standings/15864815`
             );
             const data = await response.json();
