@@ -17,7 +17,7 @@ const App = () => {
         const diffDays = Math.floor(
             (now - referenceDate) / (1000 * 60 * 60 * 24)
         );
-        return Math.floor(diffDays / 7);
+        return 1 + Math.floor(diffDays / 7);
     };
 
     const [currentWeek, setCurrentWeek] = React.useState(getCurrentWeek());
