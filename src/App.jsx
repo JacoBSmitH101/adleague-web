@@ -28,7 +28,7 @@ const App = () => {
         try {
             const response = await fetch(
                 //"https://adleague-web-api-dev.azurewebsites.net/api/tournament-standings/16310779"
-                `${apiUrl}/tournament-standings/15864815`
+                `${apiUrl}/tournament-standings/16310779`
             );
             const data = await response.json();
             setStandings(data);
