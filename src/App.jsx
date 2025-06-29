@@ -142,7 +142,7 @@ const App = () => {
                     <table className="w-full text-sm text-left border border-gray-600">
                         <thead className="bg-gray-700">
                             <tr>
-                                <th className="p-2">Name (avg)</th>
+                                <th className="p-2">Name</th>
                                 <th className="p-2">Played</th>
                                 <th className="p-2">Wins</th>
                                 <th className="p-2">Losses</th>

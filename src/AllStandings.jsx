@@ -72,7 +72,7 @@ const AllTablesPage = () => {
                                     <thead className="bg-gray-700">
                                         <tr>
                                             <th className="p-2 text-left">
-                                                Name
+                                                Name (avg)
                                             </th>
                                             <th className="p-2 text-center">
                                                 P
